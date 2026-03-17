@@ -221,6 +221,46 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
               Bukti Foto/Video <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>(Link Drive disarankan)</span>
             </label>
+
+            {/* Banner Folder Drive Pusat */}
+            <div style={{ 
+              background: 'rgba(129, 140, 248, 0.1)', 
+              border: '1px solid rgba(129, 140, 248, 0.2)', 
+              borderRadius: '12px', 
+              padding: '1rem', 
+              marginBottom: '1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#818cf8', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                📂 Folder Pusat Bukti Pelaporan
+              </div>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+                1. Klik link di bawah untuk membuka Google Drive.<br/>
+                2. Unggah file Anda ke sana.<br/>
+                3. Klik kanan file Anda &rarr; "Dapatkan Link" &rarr; Ubah akses ke "Siapa saja yang memiliki link".<br/>
+                4. Salin dan tempel Link Spesifik file tersebut ke kolom input di bawah.
+              </p>
+              <a 
+                href="https://drive.google.com/drive/folders/1h1YrRgDbeoiAMrPzgPZMqz5OcW7kHmjp?usp=sharing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="btn-primary"
+                style={{ 
+                  marginTop: '0.5rem', 
+                  padding: '0.5rem', 
+                  fontSize: '0.8rem', 
+                  textAlign: 'center', 
+                  textDecoration: 'none',
+                  display: 'inline-block',
+                  width: 'auto',
+                  alignSelf: 'flex-start'
+                }}
+              >
+                Buka Folder Drive Pusat &rarr;
+              </a>
+            </div>
             
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
               <button 
