@@ -841,20 +841,62 @@ const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPag
                 </div>
 
                 {modalMode === 'resolve' && (
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', fontWeight: '500' }}>
-                      Link Drive Bukti Penyelesaian
-                    </label>
-                    <input
-                      type="url"
-                      className="input-field"
-                      placeholder="https://drive.google.com/..."
-                      value={resolutionLink}
-                      onChange={(e) => setResolutionLink(e.target.value)}
-                    />
-                    <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
-                      *Link khusus untuk melihat hasil akhir perbaikan.
-                    </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {/* Banner Folder Drive Pusat */}
+                    <div style={{
+                      background: 'rgba(52, 211, 153, 0.08)',
+                      border: '1px solid rgba(52, 211, 153, 0.2)',
+                      borderRadius: '10px',
+                      padding: '0.85rem 1rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.4rem'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#34d399', fontWeight: 'bold', fontSize: '0.85rem' }}>
+                        📂 Folder Pusat Bukti Penyelesaian
+                      </div>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.5' }}>
+                        Unggah foto/video hasil perbaikan ke Drive, lalu salin link file spesifik ke kolom di bawah.
+                      </p>
+                      <a
+                        href="https://drive.google.com/drive/folders/1h1YrRgDbeoiAMrPzgPZMqz5OcW7kHmjp?usp=sharing"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary"
+                        style={{
+                          marginTop: '0.25rem',
+                          padding: '0.4rem 0.75rem',
+                          fontSize: '0.75rem',
+                          textAlign: 'center',
+                          textDecoration: 'none',
+                          display: 'inline-block',
+                          width: 'auto',
+                          alignSelf: 'flex-start',
+                          background: 'rgba(52, 211, 153, 0.15)',
+                          border: '1px solid rgba(52, 211, 153, 0.3)',
+                          color: '#34d399',
+                          borderRadius: '0.5rem'
+                        }}
+                      >
+                        Buka Folder Drive Pusat →
+                      </a>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', fontWeight: '500' }}>
+                        Link Drive Bukti Penyelesaian
+                      </label>
+                      <input
+                        type="url"
+                        className="input-field"
+                        placeholder="https://drive.google.com/..."
+                        value={resolutionLink}
+                        onChange={(e) => setResolutionLink(e.target.value)}
+                      />
+                      <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>
+                        *Link khusus file hasil perbaikan, bukan link folder.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
