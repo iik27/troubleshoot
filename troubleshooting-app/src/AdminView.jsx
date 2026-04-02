@@ -304,7 +304,7 @@ const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPag
       // 3. HEADER TABEL (Row 7)
       const headerRow = worksheet.getRow(7);
       headerRow.values = [
-        "NO", "TANGGAL LAPORAN", "NAMA PELAPOR", "DIVISI / UNIT",
+        "NO", "NO. PENGADUAN", "TANGGAL LAPORAN", "NAMA PELAPOR", "DIVISI / UNIT",
         "KATEGORI", "DESKRIPSI MASALAH", "LINK BUKTI AWAL",
         "STATUS PROSES", "CATATAN ADMIN / RESOLUSI",
         "WAKTU TERIMA", "WAKTU SELESAI", "LINK BUKTI HASIL"
@@ -331,6 +331,7 @@ const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPag
       dataToExport.forEach((r, index) => {
         const row = worksheet.addRow([
           index + 1,
+          r.complaint_number || '-',           // No. Pengaduan (kolom baru)
           new Date(r.created_at).toLocaleString('id-ID'),
           r.reporterName || r.reporter_name || '-',
           r.division || '-',
@@ -354,8 +355,13 @@ const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPag
             right: { style: 'thin', color: { argb: 'FF000000' } }
           };
 
-          // Styling khusus untuk Hyperlink (Kolom 7: Bukti Awal, Kolom 12: Bukti Hasil)
-          if (colNumber === 7 || colNumber === 12) {
+          // Styling khusus untuk kolom No. Pengaduan (kolom 2)
+          if (colNumber === 2 && cell.value && cell.value !== '-') {
+            cell.font = { color: { argb: 'FF7C3AED' }, bold: true, name: 'Courier New' };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          }
+          // Styling khusus untuk Hyperlink (Kolom 8: Bukti Awal, Kolom 13: Bukti Hasil)
+          if (colNumber === 8 || colNumber === 13) {
              if (cell.value && typeof cell.value === 'object' && cell.value.hyperlink) {
                 cell.font = { color: { argb: 'FF0000FF' }, underline: true };
              }
@@ -366,6 +372,7 @@ const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPag
       // 5. ATUR LEBAR KOLOM
       worksheet.columns = [
         { width: 5 },  // NO
+        { width: 20 }, // NO. PENGADUAN (baru)
         { width: 22 }, // TANGGAL
         { width: 22 }, // PELAPOR
         { width: 20 }, // DIVISI
@@ -550,8 +557,14 @@ const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPag
                     [...filteredReports].reverse().map(report => (
                       <tr key={report.id} style={{ borderBottom: '1px solid var(--glass-border)' }}>
                         <td style={{ padding: '1.25rem' }}>
-                          <p style={{ fontWeight: '600', color: 'white' }}>{report.reporterName}</p>
-                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{report.division}</p>
+                          {/* Tampilkan No. Pengaduan jika ada (laporan baru) */}
+                          {report.complaint_number && (
+                            <p style={{ fontSize: '0.65rem', color: '#c084fc', fontFamily: 'monospace', fontWeight: '600', margin: '0 0 0.2rem 0', letterSpacing: '0.04em' }}>
+                              🎫 {report.complaint_number}
+                            </p>
+                          )}
+                          <p style={{ fontWeight: '600', color: 'white', margin: 0 }}>{report.reporterName}</p>
+                          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>{report.division}</p>
                         </td>
                         <td style={{ padding: '1.25rem' }}>
                           <p style={{ fontWeight: '500' }}>{report.category}</p>
@@ -855,6 +868,18 @@ const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPag
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#34d399', fontWeight: 'bold', fontSize: '0.85rem' }}>
                         📂 Folder Pusat Bukti Penyelesaian
                       </div>
+                      {/* Tampilkan No. Pengaduan sebagai panduan penamaan file */}
+                      {selectedReport?.complaint_number && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(192,132,252,0.08)', border: '1px solid rgba(192,132,252,0.2)', borderRadius: '6px', padding: '0.4rem 0.6rem' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>No. Pengaduan:</span>
+                          <span style={{ fontFamily: 'monospace', fontWeight: '700', color: '#c084fc', fontSize: '0.85rem', letterSpacing: '0.05em' }}>{selectedReport.complaint_number}</span>
+                        </div>
+                      )}
+                      {selectedReport?.complaint_number && (
+                        <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: 0 }}>
+                          📌 Beri nama file: <span style={{ color: 'white', fontFamily: 'monospace' }}>{selectedReport.complaint_number}_hasil.jpg</span>
+                        </p>
+                      )}
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.5' }}>
                         Unggah foto/video hasil perbaikan ke Drive, lalu salin link file spesifik ke kolom di bawah.
                       </p>

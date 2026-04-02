@@ -23,7 +23,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  *   admin_note TEXT,
  *   resolution_link TEXT,
  *   accepted_at TIMESTAMPTZ,
- *   completed_at TIMESTAMPTZ
+ *   completed_at TIMESTAMPTZ,
+ *   complaint_number TEXT        -- Format: BM-YYYYMMDD-XXXX (nullable, hanya laporan baru)
  * );
  * 
  * -- ALTER TABLE jika sudah ada (Jalankan ini di SQL Editor):

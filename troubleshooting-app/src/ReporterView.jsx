@@ -1,6 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 
+// ============================================================
+// FUNGSI: Generate No. Pengaduan Otomatis
+// Format: BM-YYYYMMDD-XXXX
+// Contoh: BM-20260402-A3F1
+// Dibuat unik dengan kombinasi tanggal + 4 karakter random (A-Z, 0-9)
+// ============================================================
+const generateComplaintNumber = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const dateStr = `${year}${month}${day}`;
+
+  // 4 karakter random: huruf kapital (A-Z) dan angka (0-9)
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const randomSuffix = Array.from({ length: 4 }, () =>
+    chars[Math.floor(Math.random() * chars.length)]
+  ).join('');
+
+  return `BM-${dateStr}-${randomSuffix}`;
+};
+
 // Komponen Live Timer untuk menghitung durasi On Process
 const LiveTimer = ({ acceptedAt, completedAt, status }) => {
   const [duration, setDuration] = useState('');
@@ -50,6 +72,7 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
     evidenceType: 'link', // 'file' or 'link'
     evidence: null,
     manualLink: '',
+    complaintNumber: generateComplaintNumber(), // Generate saat form pertama kali dibuat
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -107,7 +130,8 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
             category: finalCategory,
             description: formData.description,
             drive_link: finalLink,
-            status: 'Menunggu' // Berubah ke 'Menunggu' sesuai alur baru
+            status: 'Menunggu',
+            complaint_number: formData.complaintNumber, // Simpan No. Pengaduan ke DB
           }
         ])
         .select();
@@ -115,6 +139,7 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
       if (!error) {
         localStorage.setItem('tb_last_submit', Date.now().toString());
         onReportSubmit(); // Refresh the list in App.jsx
+        // Reset form dan generate No. Pengaduan BARU untuk laporan berikutnya
         setFormData({ 
           ...formData,
           category: 'Kerusakan Perangkat', 
@@ -122,6 +147,7 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
           description: '', 
           evidence: null,
           manualLink: '',
+          complaintNumber: generateComplaintNumber(), // Nomor baru untuk laporan selanjutnya
         });
         alert('Laporan berhasil terkirim!');
       } else {
@@ -215,6 +241,30 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
               onChange={(e) => setFormData({...formData, description: e.target.value})}
               required
             />
+          </div>
+
+          {/* Banner No. Pengaduan - Panduan Penamaan File */}
+          <div style={{
+            background: 'rgba(192, 132, 252, 0.08)',
+            border: '1px solid rgba(192, 132, 252, 0.25)',
+            borderRadius: '12px',
+            padding: '1rem 1.25rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '0.5rem'
+          }}>
+            <div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '0 0 0.25rem 0', textTransform: 'uppercase', letterSpacing: '0.05em' }}>No. Pengaduan Anda</p>
+              <p style={{ fontSize: '1.35rem', fontWeight: '700', fontFamily: 'monospace', color: '#c084fc', margin: 0, letterSpacing: '0.05em' }}>
+                {formData.complaintNumber}
+              </p>
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'right', lineHeight: '1.6' }}>
+              <p style={{ margin: 0 }}>📌 Gunakan nomor ini sebagai nama file bukti Anda.</p>
+              <p style={{ margin: 0 }}>Contoh: <span style={{ color: 'white', fontFamily: 'monospace' }}>{formData.complaintNumber}_bukti.jpg</span></p>
+            </div>
           </div>
 
           <div>
@@ -353,6 +403,12 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
               <div key={report.id} className="glass-card" style={{ padding: '1.25rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.75rem' }}>
                   <div>
+                    {/* Tampilkan No. Pengaduan jika ada (laporan baru) */}
+                    {report.complaint_number && (
+                      <p style={{ fontSize: '0.7rem', color: '#c084fc', fontFamily: 'monospace', fontWeight: '600', margin: '0 0 0.25rem 0', letterSpacing: '0.05em' }}>
+                        🎫 {report.complaint_number}
+                      </p>
+                    )}
                     <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{report.category}</h3>
                     <div style={{ display: 'flex', gap: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                       <span>👤 {report.reporterName}</span>
