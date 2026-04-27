@@ -75,6 +75,51 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
     complaintNumber: generateComplaintNumber(), // Generate saat form pertama kali dibuat
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState(null); // { message, type, id }
+  
+  // REAL-TIME NOTIFICATIONS
+  useEffect(() => {
+    if (!userProfile?.name) return;
+
+    console.log('Subscribing to real-time updates for:', userProfile.name);
+
+    const subscription = supabase
+      .channel('reporter_notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'reports',
+          filter: `reporter_name=eq.${userProfile.name}`
+        },
+        (payload) => {
+          console.log('Real-time change detected:', payload);
+          const oldStatus = payload.old?.status;
+          const newStatus = payload.new?.status;
+
+          if (oldStatus !== newStatus) {
+            const complaintNum = payload.new.complaint_number || 'Laporan';
+            setNotification({
+              id: Date.now(),
+              message: `📢 ${complaintNum} Anda telah diperbarui menjadi: ${newStatus}`,
+              type: newStatus.toLowerCase().includes('selesai') ? 'success' : 'info'
+            });
+
+            // Auto-hide after 10 seconds
+            setTimeout(() => setNotification(null), 10000);
+            
+            // Refresh the list automatically
+            onReportSubmit();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [userProfile?.name]);
   
   const totalPages = Math.ceil(totalReports / 10);
 
@@ -164,6 +209,37 @@ const ReporterView = ({ onReportSubmit, reports, userProfile, totalReports, curr
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
+      {/* Floating Notification */}
+      {notification && (
+        <div 
+          className="animate-slide-in"
+          style={{
+            position: 'fixed',
+            top: '2rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+            background: notification.type === 'success' ? 'var(--status-success)' : 'var(--primary)',
+            color: 'white',
+            padding: '1rem 1.5rem',
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            minWidth: '300px'
+          }}
+        >
+          <span style={{ fontSize: '1.2rem' }}>{notification.message}</span>
+          <button 
+            onClick={() => setNotification(null)}
+            style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.2rem' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <section className="glass-card" style={{ padding: '2rem', marginBottom: '2rem' }}>
         <h2 style={{ marginBottom: '1.5rem', fontSize: '1.5rem' }}>Lapor Masalah</h2>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

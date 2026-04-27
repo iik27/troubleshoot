@@ -43,7 +43,7 @@ const LiveTimer = ({ acceptedAt, completedAt, status }) => {
   return <span style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>⏱ {duration}</span>;
 };
 
-const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPage, onPageChange }) => {
+const AdminView = ({ onLogout, onStatusUpdate, totalReports, statusCounts, reports, currentPage, onPageChange }) => {
   const [activeTab, setActiveTab] = useState('dashboard'); // 'dashboard' or 'settings'
   const [users, setUsers] = useState([]);
   const [newUser, setNewUser] = useState({ name: '', pin: '', role: 'reporter' });
@@ -88,11 +88,11 @@ const AdminView = ({ onLogout, onStatusUpdate, totalReports, reports, currentPag
   });
 
   const stats = {
-    total: totalReports, // Use total from DB for stats
-    menunggu: reports.filter(r => r.status && r.status.toLowerCase() === 'menunggu').length,
-    proses: reports.filter(r => r.status && r.status.toLowerCase() === 'on process').length,
-    selesai: reports.filter(r => r.status && r.status.toLowerCase() === 'selesai').length,
-    cancel: reports.filter(r => r.status && r.status.toLowerCase() === 'cancel').length,
+    total: totalReports,
+    menunggu: statusCounts.menunggu,
+    proses: statusCounts.proses,
+    selesai: statusCounts.selesai,
+    cancel: statusCounts.cancel,
   };
 
   const handleStatusAction = (report, newStatus) => {

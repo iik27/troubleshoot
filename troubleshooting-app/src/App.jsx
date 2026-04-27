@@ -13,6 +13,7 @@ function App() {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [statusCounts, setStatusCounts] = useState({ menunggu: 0, proses: 0, selesai: 0, cancel: 0 });
   const limit = 10;
 
   // Load session from localStorage
@@ -56,6 +57,26 @@ function App() {
         timestamp: new Date(r.created_at).toLocaleString()
       })));
       setTotalCount(count || 0);
+
+      // GLOBAL STATUS COUNTS: Fetch total counts for each status regardless of pagination
+      if (session?.role === 'admin') {
+        const fetchStatusCount = async (status) => {
+          const { count } = await supabase
+            .from('reports')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', status);
+          return count || 0;
+        };
+
+        const [m, p, s, c] = await Promise.all([
+          fetchStatusCount('Menunggu'),
+          fetchStatusCount('On Process'),
+          fetchStatusCount('Selesai'),
+          fetchStatusCount('Cancel')
+        ]);
+
+        setStatusCounts({ menunggu: m, proses: p, selesai: s, cancel: c });
+      }
     }
     setIsLoading(false);
   };
@@ -166,6 +187,7 @@ function App() {
               reports={reports}
               onStatusUpdate={handleUpdateStatus}
               totalReports={totalCount}
+              statusCounts={statusCounts}
               currentPage={currentPage}
               onPageChange={setCurrentPage}
             />
